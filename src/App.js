@@ -3,7 +3,7 @@ import API from './API';
 function App() {
   return (
     <div className='App'>
-      <h1>Hello </h1>
+      <h1>Crypto Price </h1>
       <API />
     </div>
   );

@@ -6,7 +6,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
+  Label,
 } from 'recharts';
 
 // const proxy = 'https://cors-anywhere.herokuapp.com/';
@@ -45,26 +45,49 @@ const API = () => {
 
   return (
     <div className='container'>
+      <h2>Bitcoin (BTC)</h2>
+
+      {chartData.length > 0 && (
+        <h1>
+          ${(chartData[chartData.length - 1].rate * 1).toLocaleString('en')}
+        </h1>
+      )}
+
       <LineChart
         width={1200}
         height={500}
         data={chartData}
         margin={{ top: 5, right: 10, left: 20, bottom: 5 }}
       >
-        <XAxis dataKey='timestamp' />
-        <YAxis dataKey='rate' padding={{ bottom: -500, top: 0 }} />
-        <CartesianGrid strokeDasharray='3 3' />
-        <Tooltip />
-        <Legend />
+        <XAxis
+          dataKey='timestamp'
+          type='category'
+          interval='preserveStartEnd'
+        />
+        <YAxis hide='true' dataKey='rate' padding={{ bottom: -1500, top: 0 }} />
+        <CartesianGrid strokeDasharray='1 1' />
+        <Tooltip
+          labelStyle={{
+            textAlign: 'center',
+            fontSize: '1.2rem',
+            color: '#637281',
+          }}
+          contentStyle={{
+            textAlign: 'center',
+            fontSize: '2rem',
+          }}
+          separator=''
+        />
         <Line
           type='monotone'
           dataKey='rate'
           stroke='#8884d8'
-          activeDot={{ r: 8 }}
+          dot={false}
+          strokeWidth='5'
+          name='$'
+          // unit=''
         />
       </LineChart>
-
-      <h2>From API.js</h2>
     </div>
   );
 };
