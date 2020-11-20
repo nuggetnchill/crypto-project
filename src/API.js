@@ -13,6 +13,7 @@ import {
 // const NOMICS_API_URL = `https://api.nomics.com/v1/currencies/ticker?key=${process.env.REACT_APP_KEY}&ids=BTC,ETH,XRP&interval=1d,30d&per-page=100&page=1`;
 const NOMICS_API_PRICE_URL = `https://api.nomics.com/v1/exchange-rates/history?key=${process.env.REACT_APP_KEY}&currency=BTC&start=2020-11-18T00%3A00%3A00Z&end=2020-11-19T00%3A00%3A00Z`;
 const API = () => {
+  const [search, setSearch] = useState();
   const [rate, setRate] = useState([]);
   const [timestamp, setTimestamp] = useState([]);
 
@@ -43,8 +44,27 @@ const API = () => {
     }),
   ]);
 
+  const handleInput = (event) => {
+    setSearch(event.target.value);
+  };
+
+  const handleSubmit = () => {
+    console.log('submitted');
+  };
+
+  const enterKey = (event) => {
+    return event.key === 'Enter' ? console.log('enter!!!') : null;
+  };
+
   return (
     <div className='container'>
+      <input
+        onKeyPress={enterKey}
+        onChange={handleInput}
+        name='search-currency'
+        type='text'
+      />
+      <button onClick={handleSubmit}>Search</button>
       <h2>Bitcoin (BTC)</h2>
 
       {chartData.length > 0 && (
