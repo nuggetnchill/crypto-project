@@ -176,7 +176,7 @@ const API = () => {
           type='monotone'
           dataKey='rate'
           name='$'
-          stroke='#82ca9d'
+          stroke='#00E08E'
           strokeWidth='4'
           fillOpacity={1}
           fill='url(#colorPv)'
