@@ -32,64 +32,26 @@ const usdFormat = new Intl.NumberFormat('en-US', {
 const API = () => {
   const [timeframe, setTimeframe] = useState('1D');
   const [searchField, setSearchField] = useState('ETH');
-  const [rate, setRate] = useState([]);
-  const [timestamp, setTimestamp] = useState([]);
   const [startDate, setStartDate] = useState(yesterday);
   const [endDate, setEndDate] = useState(today);
+  const [chartData, setChartData] = useState([]);
 
   const NOMICS_API_PRICE_URL = `https://api.nomics.com/v1/exchange-rates/history?key=${process.env.REACT_APP_KEY}&currency=${searchField}&start=${startDate}&end=${endDate}`;
 
   const fetchData = async () => {
     const response = await fetch(NOMICS_API_PRICE_URL);
     const data = await response.json();
-
-    // Splitting data into 2 arrays
-    // https://medium.com/javascript-in-plain-english/how-to-add-to-an-array-in-react-state-3d08ddb2e1dc
-    // ^ this link was a good read about using spread operator and wrapper fn for problem below
-    await data.forEach((el) => {
-      setTimestamp((timestamp) => [...timestamp, el.timestamp]);
-      setRate((rate) => [...rate, el.rate]);
-      console.log('setTimestamp and setRate');
-    });
-    await console.log('fetch!');
-
-    // await addChartData();
-    await console.log('chartData added from fetch');
+    await setChartData(data);
   };
-
-  // Combining the arrays that I splitted earlier after modifications
-  let chartData = [];
-  // const addChartData = () => {
-  if (chartData.length == 0 && rate.length > 0) {
-    rate.forEach((each, i) => {
-      chartData.push({
-        // timestamp: new Date(timestamp[i]).toLocaleString(),
-        timestamp: timestamp[i],
-        rate: (each * 1).toFixed(3),
-      });
-    });
-  }
-
-  //   console.log('from chartData function: ' + chartData);
-  // };
-
-  console.log(chartData);
 
   const initialLoad = async () => {
     await fetchData();
-    await console.log('initial fetch!');
+    await console.log('initial fetch from initialLoad()');
   };
 
   useEffect(() => {
     initialLoad();
   }, []);
-
-  // useEffect(() => {
-  //   fetchData();
-  //   console.log('initial fetch!');
-  //   addChartData();
-  //   console.log('initial addChartData!');
-  // }, []);
 
   // USER INPUT, BUTTONS Fn
   const handleInput = (event) => {
@@ -97,17 +59,13 @@ const API = () => {
   };
 
   const handleSubmit = () => {
-    setRate([]);
-    setTimestamp([]);
-    chartData = [];
+    setChartData([]);
     fetchData();
   };
 
   const enterKey = (event) => {
     if (event.key === 'Enter') {
-      setRate([]);
-      setTimestamp([]);
-      chartData = [];
+      setChartData([]);
       fetchData();
     }
   };
@@ -115,10 +73,8 @@ const API = () => {
   // HANDLING WHEN timeframe CHANGES
 
   const timeframeButton = async (event) => {
-    chartData = [];
+    setChartData([]);
     setTimeframe(event.target.innerText);
-    await setRate([]);
-    await setTimestamp([]);
     await setStartDate(event.target.id);
     await fetchData();
   };
@@ -274,47 +230,6 @@ const API = () => {
           <YAxis hide={true} domain={['auto', 'auto']} />
         </AreaChart>
       </div>
-
-      {/* Old Line Chart */}
-      {/* <LineChart
-        width={1000}
-        height={400}
-        data={chartData}
-        margin={{ top: 5, right: 50, left: 20, bottom: 5 }}
-      >
-        <XAxis
-          dataKey='timestamp'
-          type='category'
-          interval='preserveStartEnd'
-        />
-        <YAxis hide='true' dataKey='rate' padding={{ bottom: 0, top: 0 }} />
-        <CartesianGrid vertical={false} />
-        <Tooltip
-          labelStyle={{
-            textAlign: 'center',
-            fontSize: '1.2rem',
-            color: 'white',
-          }}
-          contentStyle={{
-            textAlign: 'center',
-            fontSize: '2rem',
-            backgroundColor: '#2c303371',
-          }}
-          itemStyle={{
-            color: 'white',
-            backgroundColor: '#2c303371',
-          }}
-          separator=''
-        />
-        <Line
-          type='monotone'
-          dataKey='rate'
-          stroke='#8884d8'
-          dot={false}
-          strokeWidth='5'
-          name='$'
-        />
-      </LineChart> */}
     </div>
   );
 };
