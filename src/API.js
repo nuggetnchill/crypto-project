@@ -61,7 +61,8 @@ const API = () => {
   let chartData = [];
   rate.forEach((each, i) => {
     chartData.push({
-      timestamp: new Date(timestamp[i]).toLocaleString(),
+      // timestamp: new Date(timestamp[i]).toLocaleString(),
+      timestamp: timestamp[i],
       rate: (each * 1).toFixed(3),
     });
   });
@@ -96,6 +97,7 @@ const API = () => {
         placeholder='Search asset...'
       />
       <button onClick={handleSubmit}>Search</button>
+
       <h2>Currency: {searchField}</h2>
 
       {chartData.length > 0 && (
@@ -104,8 +106,19 @@ const API = () => {
         </h1>
       )}
 
-      <div className='chart-container'>
-        {/* Area Chart */}
+      <div className='timeframe'>
+        <ul className='timeframe-options'>
+          <li>1D</li>
+          <li>1W</li>
+          <li>1M</li>
+          <li>1Y</li>
+          <li>YTD</li>
+          <li>All</li>
+        </ul>
+      </div>
+
+      <div className='chart-container-main'>
+        {/* MAIN CHART */}
         <AreaChart
           width={1100}
           height={400}
@@ -114,33 +127,58 @@ const API = () => {
         >
           <defs>
             <linearGradient id='colorPv' x1='0' y1='0' x2='0' y2='1'>
-              <stop offset='5%' stopColor='#82ca9d' stopOpacity={0.5} />
-              <stop offset='95%' stopColor='#82ca9d' stopOpacity={0} />
+              <stop offset='0%' stopColor='#82ca9d' stopOpacity={0.5} />
+              <stop offset='100%' stopColor='#82ca9d' stopOpacity={0} />
             </linearGradient>
           </defs>
-          <XAxis dataKey='timestamp' />
+          <XAxis
+            dataKey='timestamp'
+            interval={2}
+            tickSize={15}
+            tickFormatter={(value) => {
+              const dateInfo = new Date(value).toString().split(' ');
+              let month = dateInfo[1];
+              let date = dateInfo[2];
+              let time = dateInfo[4].split(':');
+              return time[0] === '00'
+                ? `${date}.${month}`
+                : `${time[0]}:${time[1]}`;
+            }}
+          />
           <YAxis
+            minTickGap={5}
+            tickSize={15}
+            tickLine={false}
             tickFormatter={(value) => {
               return usdFormat.format(value);
             }}
             dataKey='rate'
+            axisLine={false}
             domain={['dataMin-5', 'auto']}
-            // padding={{ bottom: 10 }}
+            padding={{ bottom: 30 }}
           />
-          <CartesianGrid strokeDasharray='1 1' vertical={false} />
+          <CartesianGrid strokeDasharray='0.2' vertical={false} />
           <Tooltip
             formatter={(value) => {
               return usdFormat.format(value);
             }}
+            labelFormatter={(value) => {
+              const dateInfo = new Date(value).toString().split(' ');
+              let day = dateInfo[0];
+              let month = dateInfo[1];
+              let date = dateInfo[2];
+              let time = dateInfo[4].split(':');
+              return `${day}, ${month} ${date}, ${time[0]}:${time[1]} `;
+            }}
             labelStyle={{
               textAlign: 'center',
-              fontSize: '1.2rem',
+              fontSize: '1rem',
               color: 'white',
               backgroundColor: '#2c303371',
             }}
             contentStyle={{
               textAlign: 'center',
-              fontSize: '2rem',
+              fontSize: '1rem',
               backgroundColor: '#2c303371',
               border: 'none',
             }}
@@ -154,9 +192,9 @@ const API = () => {
             separator=''
           />
           <Area
-            type='monotone'
+            // type='monotone'
             dataKey='rate'
-            name=' '
+            name='Price: '
             stroke='#00E08E'
             strokeWidth='4'
             fillOpacity={1}
@@ -164,6 +202,32 @@ const API = () => {
           />
         </AreaChart>
       </div>
+
+      {/* SECONDARY CHART */}
+      <div className='chart-container-secondary'>
+        <AreaChart
+          className='secondary-chart'
+          width={1100}
+          height={80}
+          data={chartData}
+          margin={{
+            top: 5,
+            right: 0,
+            left: 80,
+            bottom: 5,
+          }}
+        >
+          <Area
+            type='monotone'
+            dataKey='rate'
+            stroke='#00E08E'
+            fill='#82ca9e50'
+            fill='#1d442c50 '
+          />
+          <YAxis hide={true} domain={['auto', 'auto']} />
+        </AreaChart>
+      </div>
+
       {/* Old Line Chart */}
       {/* <LineChart
         width={1000}
