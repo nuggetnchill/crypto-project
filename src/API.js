@@ -30,6 +30,8 @@ const usdFormat = new Intl.NumberFormat('en-US', {
 // const NOMICS_API_URL = `https://api.nomics.com/v1/currencies/ticker?key=${process.env.REACT_APP_KEY}&ids=BTC,ETH,XRP&interval=1d,30d&per-page=100&page=1`;
 
 const API = () => {
+  const [loading, setLoading] = useState(false);
+  const [toggle, setToggle] = useState(true);
   const [timeframe, setTimeframe] = useState('1D');
   const [searchField, setSearchField] = useState('ETH');
   const [startDate, setStartDate] = useState(yesterday);
@@ -44,14 +46,9 @@ const API = () => {
     await setChartData(data);
   };
 
-  const initialLoad = async () => {
-    await fetchData();
-    await console.log('initial fetch from initialLoad()');
-  };
-
   useEffect(() => {
-    initialLoad();
-  }, []);
+    fetchData();
+  }, [toggle]);
 
   // USER INPUT, BUTTONS Fn
   const handleInput = (event) => {
@@ -72,12 +69,12 @@ const API = () => {
 
   // HANDLING WHEN timeframe CHANGES
 
-  const timeframeButton = async (event) => {
+  function timeframeButton(event) {
     setChartData([]);
     setTimeframe(event.target.innerText);
-    await setStartDate(event.target.id);
-    await fetchData();
-  };
+    setStartDate(event.target.id);
+    setToggle(!toggle);
+  }
 
   // RENDER HERE:
   return (
@@ -99,6 +96,8 @@ const API = () => {
           ${(chartData[chartData.length - 1].rate * 1).toLocaleString('en')}
         </h1>
       )}
+
+      {loading ? <h1>Loading...</h1> : null}
 
       <div className='timeframe'>
         <ul className='timeframe-options'>
