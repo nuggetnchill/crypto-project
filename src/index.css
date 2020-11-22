@@ -18,14 +18,15 @@ code {
     monospace;
 }
 
-.chart-container-main {
+.data-container {
   border: 1px solid #75757550;
   border-radius: 5px;
-  border-bottom: none;
+  background-color: #1f272c;
+}
+
+.chart-container-primary {
   display: flex;
   justify-content: center;
-  background-color: #1f272c;
-  padding: 2rem 0 0 0;
 }
 .chart-container > * {
   padding: 3rem;
@@ -33,12 +34,8 @@ code {
 
 .chart-container-secondary {
   padding: 2rem 0;
-  border: 1px solid #75757550;
-  border-radius: 5px;
-  border-top: none;
   display: flex;
   justify-content: center;
-  background-color: #1f272c;
 }
 
 .timeframe-options {
@@ -49,13 +46,14 @@ code {
 }
 
 .timeframe-options > li {
+  display: relative;
   color: #d6d6d6;
   padding: 0.1rem 0.5rem;
   list-style-type: none;
-  border-radius: 10%;
+  border-radius: 0.25rem;
 }
 
 .timeframe-options > li:hover {
   cursor: pointer;
-  background-color: #1f272c;
+  background-color: #14191d;
 }
