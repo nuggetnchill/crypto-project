@@ -18,14 +18,24 @@ const aWeekAgo = new Date(new Date() - 7 * DAY_IN_MS).toISOString();
 const aMonthAgo = new Date(new Date() - 31 * DAY_IN_MS).toISOString();
 const aYearAgo = new Date(new Date() - 365 * DAY_IN_MS).toISOString();
 
+// Create our number formatter // Handling monetary currency(USD)
+const usdFormat = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  // These options are needed to round to whole numbers
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 3,
+});
+
 // const proxy = 'https://cors-anywhere.herokuapp.com/';
 // const NOMICS_API_URL = `https://api.nomics.com/v1/currencies/ticker?key=${process.env.REACT_APP_KEY}&ids=BTC,ETH,XRP&interval=1d,30d&per-page=100&page=1`;
 
 const API = () => {
+  const [timeframe, setTimeFrame] = useState('1D');
   const [searchField, setSearchField] = useState('ETH');
   const [rate, setRate] = useState([]);
   const [timestamp, setTimestamp] = useState([]);
-  const [startDate, setStartDate] = useState(aMonthAgo);
+  const [startDate, setStartDate] = useState(yesterday);
   const [endDate, setEndDate] = useState(today);
 
   const NOMICS_API_PRICE_URL = `https://api.nomics.com/v1/exchange-rates/history?key=${process.env.REACT_APP_KEY}&currency=${searchField}&start=${startDate}&end=${endDate}`;
@@ -49,12 +59,12 @@ const API = () => {
 
   // Combining the arrays that I splitted earlier after modifications
   let chartData = [];
-  rate.forEach((each, i) => [
+  rate.forEach((each, i) => {
     chartData.push({
       timestamp: new Date(timestamp[i]).toLocaleString(),
-      rate: (each * 1).toFixed(4),
-    }),
-  ]);
+      rate: (each * 1).toFixed(3),
+    });
+  });
 
   const handleInput = (event) => {
     setSearchField(event.target.value.toUpperCase());
@@ -94,7 +104,68 @@ const API = () => {
         </h1>
       )}
 
-      <LineChart
+      <div className='chart-container'>
+        {/* Area Chart */}
+        <AreaChart
+          width={1100}
+          height={400}
+          data={chartData}
+          margin={{ top: 10, right: 0, left: 40, bottom: 0 }}
+        >
+          <defs>
+            <linearGradient id='colorPv' x1='0' y1='0' x2='0' y2='1'>
+              <stop offset='5%' stopColor='#82ca9d' stopOpacity={0.5} />
+              <stop offset='95%' stopColor='#82ca9d' stopOpacity={0} />
+            </linearGradient>
+          </defs>
+          <XAxis dataKey='timestamp' />
+          <YAxis
+            tickFormatter={(value) => {
+              return usdFormat.format(value);
+            }}
+            dataKey='rate'
+            domain={['dataMin-5', 'auto']}
+            // padding={{ bottom: 10 }}
+          />
+          <CartesianGrid strokeDasharray='1 1' vertical={false} />
+          <Tooltip
+            formatter={(value) => {
+              return usdFormat.format(value);
+            }}
+            labelStyle={{
+              textAlign: 'center',
+              fontSize: '1.2rem',
+              color: 'white',
+              backgroundColor: '#2c303371',
+            }}
+            contentStyle={{
+              textAlign: 'center',
+              fontSize: '2rem',
+              backgroundColor: '#2c303371',
+              border: 'none',
+            }}
+            itemStyle={{
+              color: 'white',
+              backgroundColor: '#2c303371',
+            }}
+            wrapperStyle={{
+              backgroundColor: '#212527bb',
+            }}
+            separator=''
+          />
+          <Area
+            type='monotone'
+            dataKey='rate'
+            name=' '
+            stroke='#00E08E'
+            strokeWidth='4'
+            fillOpacity={1}
+            fill='url(#colorPv)'
+          />
+        </AreaChart>
+      </div>
+      {/* Old Line Chart */}
+      {/* <LineChart
         width={1000}
         height={400}
         data={chartData}
@@ -132,56 +203,7 @@ const API = () => {
           strokeWidth='5'
           name='$'
         />
-      </LineChart>
-
-      {/* Test Area Chart */}
-      <AreaChart
-        width={1000}
-        height={400}
-        data={chartData}
-        margin={{ top: 10, right: 30, left: 0, bottom: 0 }}
-      >
-        <defs>
-          <linearGradient id='colorPv' x1='0' y1='0' x2='0' y2='1'>
-            <stop offset='5%' stopColor='#82ca9d' stopOpacity={0.5} />
-            <stop offset='95%' stopColor='#82ca9d' stopOpacity={0} />
-          </linearGradient>
-        </defs>
-        <XAxis dataKey='timestamp' />
-        <YAxis dataKey='rate' />
-        <CartesianGrid strokeDasharray='1 1' vertical={false} />
-        <Tooltip
-          labelStyle={{
-            textAlign: 'center',
-            fontSize: '1.2rem',
-            color: 'white',
-            backgroundColor: '#2c303371',
-          }}
-          contentStyle={{
-            textAlign: 'center',
-            fontSize: '2rem',
-            backgroundColor: '#2c303371',
-            border: 'none',
-          }}
-          itemStyle={{
-            color: 'white',
-            backgroundColor: '#2c303371',
-          }}
-          wrapperStyle={{
-            backgroundColor: '#212527bb',
-          }}
-          separator=''
-        />
-        <Area
-          type='monotone'
-          dataKey='rate'
-          name='$'
-          stroke='#00E08E'
-          strokeWidth='4'
-          fillOpacity={1}
-          fill='url(#colorPv)'
-        />
-      </AreaChart>
+      </LineChart> */}
     </div>
   );
 };

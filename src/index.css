@@ -8,11 +8,22 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  background-color: #1f272c;
+  background-color: #14191d;
   color: #d6d6d6d0;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+.chart-container {
+  border: 1px solid #75757550;
+  border-radius: 5px;
+  display: flex;
+  justify-content: center;
+  background-color: #1f272c;
+}
+.chart-container > * {
+  padding: 3rem;
 }
