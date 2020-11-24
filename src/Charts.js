@@ -33,7 +33,7 @@ const Charts = () => {
   const [loading, setLoading] = useState(false);
   const [toggle, setToggle] = useState(true);
   const [timeframe, setTimeframe] = useState('1D');
-  const [searchField, setSearchField] = useState('ETH');
+  const [searchField, setSearchField] = useState('BTC');
   const [startDate, setStartDate] = useState(yesterday);
   const [endDate, setEndDate] = useState(today);
   const [chartData, setChartData] = useState([]);
@@ -46,6 +46,14 @@ const Charts = () => {
     await setChartData(data);
     await setLoading(false);
   };
+
+  let highestRate;
+  for (let i = 1; i < chartData.length; i++) {
+    let max = chartData[0]['rate'];
+    let value = chartData[i]['rate'];
+    max = value > max ? value : max;
+    highestRate = max;
+  }
 
   useEffect(() => {
     fetchData();
@@ -131,7 +139,7 @@ const Charts = () => {
                 width={1100}
                 height={400}
                 data={chartData}
-                margin={{ top: 50, right: 0, left: 40, bottom: 0 }}
+                margin={{ top: 50, right: 0, left: 60, bottom: 0 }}
               >
                 <defs>
                   <linearGradient id='colorPv' x1='0' y1='0' x2='0' y2='1'>
@@ -162,7 +170,21 @@ const Charts = () => {
                   }}
                   dataKey='rate'
                   axisLine={false}
-                  domain={['dataMin-5', 'auto']}
+                  // domain={['dataMin-5', 'dataMax+10']}
+
+                  // this works for now
+                  domain={[
+                    (dataMin) =>
+                      dataMin > 6000 &&
+                      (timeframe === '1Y' || timeframe === 'YTD')
+                        ? dataMin / 2
+                        : dataMin,
+                    (dataMax) =>
+                      dataMax > 10000 &&
+                      (timeframe === '1Y' || timeframe === 'YTD')
+                        ? dataMax * 1
+                        : dataMax,
+                  ]}
                   padding={{ bottom: 30 }}
                 />
                 <CartesianGrid strokeDasharray='0.2' vertical={false} />
@@ -221,7 +243,7 @@ const Charts = () => {
                 margin={{
                   top: 5,
                   right: 0,
-                  left: 80,
+                  left: 100,
                   bottom: 5,
                 }}
               >
