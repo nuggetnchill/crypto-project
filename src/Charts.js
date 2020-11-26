@@ -149,16 +149,23 @@ const Charts = () => {
                 </defs>
                 <XAxis
                   dataKey='timestamp'
-                  interval={2}
+                  interval='Number'
                   tickSize={15}
                   tickFormatter={(value) => {
                     const dateInfo = new Date(value).toString().split(' ');
                     let month = dateInfo[1];
                     let date = dateInfo[2];
                     let time = dateInfo[4].split(':');
-                    return time[0] === '00'
-                      ? `${date}.${month}`
-                      : `${time[0]}:${time[1]}`;
+                    let year = dateInfo[3];
+                    if (timeframe === '1D') {
+                      return time[0] === '00'
+                        ? `${date}.${month}    `
+                        : `${time[0]}:${time[1]}    `;
+                    } else if (timeframe === '1Y') {
+                      return `${month}'${year}   `;
+                    } else {
+                      return `${date}.${month}    `;
+                    }
                   }}
                 />
                 <YAxis
@@ -170,14 +177,12 @@ const Charts = () => {
                   }}
                   dataKey='rate'
                   axisLine={false}
-                  // domain={['dataMin-5', 'dataMax+10']}
-
                   // this works for now
                   domain={[
                     (dataMin) =>
                       dataMin > 6000 &&
                       (timeframe === '1Y' || timeframe === 'YTD')
-                        ? dataMin / 2
+                        ? dataMin / 5
                         : dataMin,
                     (dataMax) =>
                       dataMax > 10000 &&
@@ -254,7 +259,21 @@ const Charts = () => {
                   stroke='#00E08E'
                   fill='#82ca9e50'
                 />
-                <YAxis hide={true} domain={['auto', 'auto']} />
+                <YAxis
+                  hide={true}
+                  domain={[
+                    (dataMin) =>
+                      dataMin > 6000 &&
+                      (timeframe === '1Y' || timeframe === 'YTD')
+                        ? dataMin / 2
+                        : dataMin,
+                    (dataMax) =>
+                      dataMax > 10000 &&
+                      (timeframe === '1Y' || timeframe === 'YTD')
+                        ? dataMax
+                        : dataMax,
+                  ]}
+                />
               </AreaChart>
             </div>
           </>
