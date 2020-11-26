@@ -27,7 +27,6 @@ const usdFormat = new Intl.NumberFormat('en-US', {
 });
 
 // const proxy = 'https://cors-anywhere.herokuapp.com/';
-// const NOMICS_API_URL = `https://api.nomics.com/v1/currencies/ticker?key=${process.env.REACT_APP_KEY}&ids=BTC,ETH,XRP&interval=1d,30d&per-page=100&page=1`;
 
 const Charts = () => {
   const [loading, setLoading] = useState(false);
@@ -37,9 +36,11 @@ const Charts = () => {
   const [startDate, setStartDate] = useState(yesterday);
   const [endDate, setEndDate] = useState(today);
   const [chartData, setChartData] = useState([]);
+  const [tickerData, setTickerData] = useState(null);
 
   const NOMICS_API_PRICE_URL = `https://api.nomics.com/v1/exchange-rates/history?key=${process.env.REACT_APP_KEY}&currency=${searchField}&start=${startDate}&end=${endDate}`;
-
+  const NOMICS_API_TICKER_URL = `https://api.nomics.com/v1/currencies/ticker?key=${process.env.REACT_APP_KEY}&ids=${searchField}&interval=1d,30d&per-page=100&page=1`;
+  // const NOMICS_API_CANDLES_URL = `https://nomics.com/data/candles?currency=BTC&interval=365d`;
   const fetchData = async () => {
     const response = await fetch(NOMICS_API_PRICE_URL);
     const data = await response.json();
@@ -47,17 +48,19 @@ const Charts = () => {
     await setLoading(false);
   };
 
-  let highestRate;
-  for (let i = 1; i < chartData.length; i++) {
-    let max = chartData[0]['rate'];
-    let value = chartData[i]['rate'];
-    max = value > max ? value : max;
-    highestRate = max;
-  }
+  const fetchInfo = async () => {
+    const response = await fetch(NOMICS_API_TICKER_URL);
+    const data = await response.json();
+    await setTickerData(data);
+  };
 
   useEffect(() => {
     fetchData();
   }, [toggle]);
+
+  useEffect(() => {
+    fetchInfo();
+  }, []);
 
   // USER INPUT, BUTTONS Fn
   const handleInput = (event) => {
@@ -67,12 +70,14 @@ const Charts = () => {
   const handleSubmit = () => {
     setChartData([]);
     fetchData();
+    fetchInfo();
   };
 
   const enterKey = (event) => {
     if (event.key === 'Enter') {
       setChartData([]);
       fetchData();
+      fetchInfo();
     }
   };
 
@@ -88,22 +93,40 @@ const Charts = () => {
   // RENDER HERE:
   return (
     <div className='main-container'>
-      <input
-        onKeyPress={enterKey}
-        onChange={handleInput}
-        name='search-currency'
-        type='text'
-        placeholder='Search asset...'
-      />
-      <button onClick={handleSubmit}>Search</button>
+      <div className='search-bar'>
+        <input
+          onKeyPress={enterKey}
+          onChange={handleInput}
+          name='search-currency'
+          type='text'
+          placeholder='Search asset...'
+        />
+        <button onClick={handleSubmit}>Search</button>
+      </div>
 
-      <h2>Currency: {searchField}</h2>
-      <h3>({timeframe})</h3>
+      {tickerData && (
+        <div className='info-container'>
+          <div className='ticker-info'>
+            <img
+              src={tickerData[0].logo_url}
+              alt='ticker logo'
+              style={{ height: '5rem', padding: '1rem' }}
+            />
+            <h1>
+              {tickerData[0].name} ({tickerData[0].currency})
+            </h1>
+          </div>
 
-      {chartData.length > 0 && (
-        <h1>
-          ${(chartData[chartData.length - 1].rate * 1).toLocaleString('en')}
-        </h1>
+          <div className='ticker-stats'>
+            <h3>{tickerData[0].symbol} Price</h3>
+            <h1>
+              {usdFormat.format(tickerData[0].price)}{' '}
+              <span className='price-change-pct'>
+                {(tickerData[0]['1d'].price_change_pct * 100).toFixed(2)}%
+              </span>
+            </h1>
+          </div>
+        </div>
       )}
       <div className='data-container'>
         <div className='timeframe'>
@@ -115,19 +138,44 @@ const Charts = () => {
             >
               1D
             </li>
-            <li onClick={timeframeButton} id={aWeekAgo}>
+            <li
+              onClick={timeframeButton}
+              id={aWeekAgo}
+              style={{ backgroundColor: timeframe === '1W' ? '#14191d' : null }}
+            >
               1W
             </li>
-            <li onClick={timeframeButton} id={aMonthAgo}>
+            <li
+              onClick={timeframeButton}
+              id={aMonthAgo}
+              style={{ backgroundColor: timeframe === '1M' ? '#14191d' : null }}
+            >
               1M
             </li>
-            <li onClick={timeframeButton} id={aYearAgo}>
+            <li
+              onClick={timeframeButton}
+              id={aYearAgo}
+              style={{ backgroundColor: timeframe === '1Y' ? '#14191d' : null }}
+            >
               1Y
             </li>
-            <li onClick={timeframeButton} id={firstDay}>
+            <li
+              onClick={timeframeButton}
+              id={firstDay}
+              style={{
+                backgroundColor: timeframe === 'YTD' ? '#14191d' : null,
+              }}
+            >
               YTD
             </li>
-            <li onClick={timeframeButton}>All</li>
+            <li
+              onClick={timeframeButton}
+              style={{
+                backgroundColor: timeframe === 'All' ? '#14191d' : null,
+              }}
+            >
+              All
+            </li>
           </ul>
         </div>
 
@@ -149,7 +197,7 @@ const Charts = () => {
                 </defs>
                 <XAxis
                   dataKey='timestamp'
-                  interval='Number'
+                  interval='preserveEnd'
                   tickSize={15}
                   tickFormatter={(value) => {
                     const dateInfo = new Date(value).toString().split(' ');

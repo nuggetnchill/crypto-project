@@ -24,6 +24,26 @@ code {
   background-color: #1f272c;
 }
 
+input {
+  background: #1f272c;
+  border: 1px solid #d6d6d6d0;
+  border-radius: 0.25rem;
+  padding: 0.6rem 4rem;
+  margin: 1rem;
+}
+
+.ticker-info {
+  display: flex;
+  align-items: center;
+}
+
+.ticker-stats {
+  margin: 1rem;
+}
+.price-change-pct {
+  font-size: 1rem;
+}
+
 .chart-container-primary {
   display: flex;
   justify-content: center;
